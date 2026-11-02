@@ -1,0 +1,6 @@
+# 서버(Ubuntu)에서 그대로 쓰도록 텍스트는 LF, PDF·이미지는 바이너리
+* text=auto eol=lf
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary

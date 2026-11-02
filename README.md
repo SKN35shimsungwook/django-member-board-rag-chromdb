@@ -2,6 +2,10 @@
 
 MySQL 8.4 Docker 컨테이너와 uv, Python 3.12 기반의 Django 회원/게시판 시스템입니다.
 
+> **내 사이트 EC2 배포기:** https://skn35shimsungwook.github.io/django-member-board-rag-chromdb/
+>
+> 이 프로젝트를 AWS EC2에 올리고 GitHub Actions 자동 배포까지 연결한 과정을 그림과 비유로 정리한 페이지입니다. (원본 파일: [docs/index.html](docs/index.html))
+
 ## 1. 주요 개발 환경
 - **Package Manager**: `uv`
 - **IDE**: VS Code (설정 파일 `.vscode/` 포함)

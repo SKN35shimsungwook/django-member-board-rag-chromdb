@@ -1,0 +1,300 @@
+<title>내 사이트 EC2 배포기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* 레이아웃: 설계도(블루프린트) 느낌의 한 줄 읽기 페이지. 단계는 왼쪽 번호 + 오른쪽 카드, 폰에서는 한 줄로 쌓임 */
+:root {
+  --bg: #eef3f8; --paper: #ffffff; --ink: #14263d; --muted: #566a82; --line: #cdd9e6; --grid: #dde7f1;
+  --accent: #1f5fae; --on-accent: #ffffff; --mark: #f2a516; --mark-bg: #fff4dc;
+  --ok: #1d7a4c; --ok-bg: #e2f4ea; --warn: #a3471a; --warn-bg: #fbeadf;
+  --code-bg: #0f1d2e; --code-fg: #d9e8f7; --code-dim: #7d97b3;
+  --f-display: "Do Hyeon", "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
+  --f-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --f-code: "JetBrains Mono", Consolas, "D2Coding", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1622; --paper: #132233; --ink: #e3edf8; --muted: #9db1c7; --line: #26394f; --grid: #16283b;
+  --accent: #7fb6f2; --on-accent: #0c1622; --mark: #f5bb45; --mark-bg: #33280f;
+  --ok: #7fd6a6; --ok-bg: #13301f; --warn: #f2a378; --warn-bg: #36200f;
+  --code-bg: #08111b; --code-fg: #d3e4f5; --code-dim: #6f88a3; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0c1622; --paper: #132233; --ink: #e3edf8; --muted: #9db1c7; --line: #26394f; --grid: #16283b;
+  --accent: #7fb6f2; --on-accent: #0c1622; --mark: #f5bb45; --mark-bg: #33280f;
+  --ok: #7fd6a6; --ok-bg: #13301f; --warn: #f2a378; --warn-bg: #36200f;
+  --code-bg: #08111b; --code-fg: #d3e4f5; --code-dim: #6f88a3; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 400 16px/1.75 var(--f-body);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.wrap { max-width: 50rem; margin: 0 auto; padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 400; text-wrap: balance; line-height: 1.25; margin: 0; }
+h1 { font-size: clamp(2rem, 6vw, 2.9rem); }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.25rem; }
+p { margin: 0; }
+code { font-family: var(--f-code); font-size: .88em; background: var(--mark-bg); padding: 1px 5px; border-radius: 4px; }
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; }
+
+.hero { display: grid; gap: 14px; margin-bottom: 36px; }
+.eyebrow { font: 600 .78rem/1 var(--f-code); letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+.lede { color: var(--muted); max-width: 38rem; }
+.live { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; background: var(--paper);
+  border: 2px solid var(--accent); border-radius: 10px; padding: 16px 18px; }
+.live .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px var(--ok-bg); flex: none; }
+.live strong { font-family: var(--f-code); font-size: 1.1rem; }
+.live .links { display: flex; flex-wrap: wrap; gap: 8px; }
+.live .links a { font-size: .9rem; background: var(--accent); color: var(--on-accent); text-decoration: none; padding: 4px 12px; border-radius: 999px; }
+
+section { margin-top: 48px; display: grid; gap: 16px; }
+.sec-label { font: 600 .75rem/1 var(--f-code); letter-spacing: .1em; color: var(--muted); }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 20px; min-width: 0; }
+.diagram { overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; text-align: center; }
+
+.cast { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 12px; }
+.cast div { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 4px; }
+.cast b { font-family: var(--f-display); font-weight: 400; font-size: 1.15rem; }
+.cast span { color: var(--muted); font-size: .92rem; }
+.cast em { font-style: normal; color: var(--accent); font-size: .85rem; }
+
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
+ol.steps > li { display: grid; grid-template-columns: 3rem 1fr; gap: 14px; counter-increment: s; }
+ol.steps > li::before { content: counter(s); font-family: var(--f-display); font-size: 1.6rem; line-height: 1;
+  width: 3rem; height: 3rem; display: grid; place-items: center; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent); }
+.step { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.step .what { color: var(--muted); font-size: .95rem; }
+.analogy { background: var(--mark-bg); border-left: 4px solid var(--mark); padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: .95rem; }
+pre.cmd { margin: 0; background: var(--code-bg); color: var(--code-fg); font: 400 .82rem/1.6 var(--f-code);
+  padding: 12px 14px; border-radius: 8px; overflow-x: auto; white-space: pre; }
+pre.cmd .c { color: var(--code-dim); }
+.who { font-size: .82rem; color: var(--muted); }
+.who b { color: var(--ink); font-weight: 600; }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: .82rem; letter-spacing: .04em; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.trouble { display: grid; gap: 12px; }
+.trouble div { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.trouble .sym { color: var(--warn); font-weight: 600; }
+.trouble .fix { color: var(--ok); }
+.note { background: var(--warn-bg); color: var(--ink); border-radius: 8px; padding: 12px 14px; font-size: .95rem; }
+
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; font-weight: 600; }
+details p { margin-top: 8px; color: var(--muted); }
+footer { margin-top: 56px; color: var(--muted); font-size: .85rem; }
+@media (max-width: 520px) {
+  ol.steps > li { grid-template-columns: 1fr; gap: 8px; }
+  ol.steps > li::before { width: 2.4rem; height: 2.4rem; font-size: 1.3rem; }
+}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">Django RAG · GitHub → AWS EC2 · 2026-11-02</p>
+  <h1>내 사이트를 인터넷에 올린 과정</h1>
+  <p class="lede">수업 PDF(AWS 배포 실습가이드 v1)에 나온 배포를 실제로 해 본 기록입니다. 명령어를 몰라도 "지금 무엇을, 왜 하는지" 따라올 수 있게 가게를 차리는 일에 빗대어 정리했습니다.</p>
+  <div class="live">
+    <span class="dot" aria-hidden="true"></span>
+    <div style="display:grid;gap:2px;min-width:0">
+      <span class="who">지금 켜져 있는 주소 (11월 3일 17:30 계정 해지 전까지)</span>
+      <strong>http://13.209.205.180</strong>
+    </div>
+    <div class="links">
+      <a href="http://13.209.205.180/" target="_blank" rel="noopener">홈</a>
+      <a href="http://13.209.205.180/rag/" target="_blank" rel="noopener">AI 검색</a>
+      <a href="http://13.209.205.180/boards/" target="_blank" rel="noopener">게시판</a>
+      <a href="http://13.209.205.180/admin/" target="_blank" rel="noopener">관리자</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <p class="sec-label">한 줄 요약</p>
+  <h2>배포는 "내 PC에서만 되던 사이트를 남도 들어올 수 있는 컴퓨터로 옮기는 일"</h2>
+  <p>지금까지 사이트는 <code>localhost</code>, 즉 내 PC 안에서만 열렸습니다. 다른 사람이 들어오려면 24시간 켜져 있고 인터넷 주소가 있는 컴퓨터가 필요합니다. 그 컴퓨터를 AWS에서 빌린 것이 <b>EC2</b>이고, 거기로 코드를 옮겨서 켜는 과정이 <b>배포</b>입니다.</p>
+  <div class="panel diagram">
+<pre class="mermaid">flowchart LR
+  A["내 PC<br/>코드 작성"] -->|git push| B["GitHub<br/>코드 창고"]
+  B -->|git clone / pull| C["AWS EC2<br/>빌린 컴퓨터"]
+  C --> D["Docker<br/>nginx · Django · MySQL"]
+  U["방문자<br/>브라우저"] -->|http://13.209.205.180| D
+</pre>
+  </div>
+</section>
+
+<section>
+  <p class="sec-label">등장하는 것들</p>
+  <h2>누가 무슨 일을 하나</h2>
+  <div class="cast">
+    <div><b>GitHub</b><span>코드를 올려 두는 창고. 서버가 여기서 코드를 받아 갑니다.</span><em>가게로 치면: 본사 창고</em></div>
+    <div><b>AWS EC2</b><span>아마존에서 시간 단위로 빌린 리눅스 컴퓨터(t3.small, 메모리 2GB).</span><em>가게로 치면: 임대한 상가</em></div>
+    <div><b>탄력적 IP</b><span>서버를 껐다 켜도 바뀌지 않는 고정 주소.</span><em>가게로 치면: 도로명 주소</em></div>
+    <div><b>보안그룹</b><span>어떤 문(포트)을 열지 정하는 방화벽. 22(관리), 80(웹), 443(HTTPS)만 엶.</span><em>가게로 치면: 출입문 잠금</em></div>
+    <div><b>Docker</b><span>프로그램을 상자(컨테이너)에 담아 어디서나 똑같이 켜 주는 도구.</span><em>가게로 치면: 조립식 매장 키트</em></div>
+    <div><b>nginx</b><span>손님을 맨 앞에서 받아 Django에 넘기고, 그림·CSS 파일은 직접 줍니다.</span><em>가게로 치면: 카운터 직원</em></div>
+    <div><b>Django + gunicorn</b><span>로그인, 게시판, AI 검색 같은 실제 기능을 처리합니다.</span><em>가게로 치면: 주방</em></div>
+    <div><b>MySQL · ChromaDB</b><span>회원·게시글 저장(MySQL), PDF 내용 검색용 저장(ChromaDB).</span><em>가게로 치면: 장부와 자료실</em></div>
+    <div><b>GitHub Actions</b><span>push할 때마다 서버에 접속해 새 코드로 다시 켜 주는 자동 로봇.</span><em>가게로 치면: 자동 납품 배송</em></div>
+  </div>
+  <div class="panel diagram">
+<pre class="mermaid">flowchart LR
+  U["방문자"] -->|80번 문| N["nginx<br/>카운터"]
+  N -->|/static 그림·CSS| S[("정적 파일")]
+  N -->|나머지 요청| W["Django + gunicorn<br/>주방"]
+  W --> M[("MySQL<br/>회원·게시글")]
+  W --> C[("ChromaDB<br/>PDF 조각")]
+  W -->|질문·임베딩| O["OpenAI API"]
+</pre>
+  </div>
+</section>
+
+<section>
+  <p class="sec-label">따라 하기 · 가이드 PDF 1~11단계</p>
+  <h2>9단계로 본 실제 작업</h2>
+  <p class="who"><b>어디서</b> 했는지도 적었습니다. "내 PC"는 Windows PowerShell, "서버"는 SSH로 접속한 EC2 리눅스, "AWS 콘솔"은 웹 화면입니다.</p>
+  <ol class="steps">
+    <li><div class="step">
+      <h3>코드를 GitHub에 올리기</h3>
+      <p class="what">회원·게시판 RAG 프로젝트만 Public 저장소에 올렸습니다. Public이라 서버가 비밀번호 없이 받아 갈 수 있습니다.</p>
+      <p class="analogy">본사 창고에 매장에서 쓸 물건을 넣어 두는 단계</p>
+      <pre class="cmd"><span class="c"># 내 PC</span>
+git push origin main</pre>
+      <p class="who">주의: <code>.env</code>(API 키·비밀번호)는 절대 올리지 않습니다. <code>.gitignore</code>로 빠져 있습니다.</p>
+    </div></li>
+
+    <li><div class="step">
+      <h3>AWS에서 컴퓨터 빌리기 (EC2)</h3>
+      <p class="what">Ubuntu 24.04, t3.small, 디스크 20GB로 만들었습니다. 접속용 열쇠(키 페어)와 문 설정(보안그룹)도 같이 정합니다.</p>
+      <p class="analogy">상가를 임대하고 열쇠를 받는 단계</p>
+      <pre class="cmd"><span class="c"># AWS CloudShell (두 번째 배포 때는 콘솔 클릭 대신 명령으로)</span>
+aws ec2 run-instances --instance-type t3.small --key-name django-rag-ec2 ...</pre>
+      <p class="who">t2.micro(1GB)는 MySQL과 ChromaDB를 같이 돌리기에 메모리가 모자라서 가이드도 t3.small 이상을 권합니다.</p>
+    </div></li>
+
+    <li><div class="step">
+      <h3>주소 고정하기 (탄력적 IP)</h3>
+      <p class="what">서버에 <code>13.209.205.180</code>을 붙였습니다. 이게 없으면 서버를 재시작할 때마다 주소가 바뀝니다.</p>
+      <p class="analogy">도로명 주소를 받는 단계</p>
+    </div></li>
+
+    <li><div class="step">
+      <h3>서버에 들어가서 Docker 깔기</h3>
+      <p class="what">SSH로 서버에 접속해 Docker를 설치하고, 메모리가 모자랄 때를 대비해 스왑 2GB를 만들었습니다.</p>
+      <p class="analogy">빈 상가에 들어가 전기·수도를 연결하는 단계</p>
+      <pre class="cmd"><span class="c"># 내 PC → 서버 접속</span>
+ssh -i ~/.ssh/django-rag-ec2 ubuntu@13.209.205.180
+<span class="c"># 서버</span>
+curl -fsSL https://get.docker.com | sudo sh</pre>
+    </div></li>
+
+    <li><div class="step">
+      <h3>코드 받고 비밀 설정 파일 만들기</h3>
+      <p class="what">GitHub에서 코드를 받고, GitHub에 없는 <code>.env</code>(DB 비밀번호, OpenAI 키, 허용 주소)를 서버에만 따로 만들었습니다.</p>
+      <p class="analogy">창고에서 물건을 받고, 금고 비밀번호는 직접 들고 가는 단계</p>
+      <pre class="cmd"><span class="c"># 서버</span>
+git clone https://github.com/SKN35shimsungwook/django-member-board-rag-chromdb.git ~/app
+<span class="c"># .env 안의 항목 이름 (값은 비밀)</span>
+MYSQL_PASSWORD  DJANGO_SECRET_KEY  DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=13.209.205.180  OPENAI_API_KEY</pre>
+    </div></li>
+
+    <li><div class="step">
+      <h3>한 번에 켜기 (Docker Compose)</h3>
+      <p class="what">운영용 설정 파일 하나로 nginx, Django, MySQL 세 상자를 만들고 켭니다. 처음엔 이미지를 만드느라 몇 분 걸립니다.</p>
+      <p class="analogy">조립식 매장 키트를 설명서대로 한 번에 세우는 단계</p>
+      <pre class="cmd"><span class="c"># 서버</span>
+docker compose -f compose.prod.yaml up -d --build
+docker compose -f compose.prod.yaml ps   <span class="c"># mysql·web·nginx 모두 running</span></pre>
+    </div></li>
+
+    <li><div class="step">
+      <h3>DB 준비하고 AI 검색 자료 넣기</h3>
+      <p class="what">DB 표를 만들고(migrate), 관리자 계정을 만들고, PDF 5개를 잘게 나눠 ChromaDB에 넣었습니다(12조각).</p>
+      <p class="analogy">장부 양식을 만들고, 자료실에 매뉴얼을 꽂아 두는 단계</p>
+      <pre class="cmd"><span class="c"># 서버 (manage.py = 컨테이너 안의 Django 명령)</span>
+manage.py migrate
+manage.py createsuperuser
+manage.py index_docs     <span class="c"># PDF 색인 완료: 12개 청크</span></pre>
+    </div></li>
+
+    <li><div class="step">
+      <h3>접속해서 확인하기</h3>
+      <p class="what">홈·게시판·로그인·AI 검색이 모두 정상(200)으로 열렸습니다. AI 검색에 "교환·반품은 며칠 안에?"라고 묻자 환불교환정책.pdf를 근거로 "단순 변심 7일 이내"라고 답했습니다.</p>
+      <p class="analogy">문을 열고 첫 손님을 받아 보는 단계</p>
+      <p class="who">등록되지 않은 주소로 들어오면 400으로 막히는 것도 확인했습니다(<code>ALLOWED_HOSTS</code>).</p>
+    </div></li>
+
+    <li><div class="step">
+      <h3>자동 배포 연결 (GitHub Actions)</h3>
+      <p class="what">GitHub가 서버에 들어올 수 있게 열쇠를 맡겼습니다. 이제 코드를 push하면 GitHub가 알아서 서버에 접속해 새 코드로 다시 켜 줍니다.</p>
+      <p class="analogy">본사가 새 물건을 자동으로 배송·진열해 주도록 계약하는 단계</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>GitHub Secret 이름</th><th>넣은 값</th><th>뜻</th></tr></thead>
+        <tbody>
+          <tr><td><code>EC2_SSH_KEY</code></td><td>gha_key 개인키</td><td>서버 문 열쇠</td></tr>
+          <tr><td><code>EC2_HOST</code></td><td>서버 IP</td><td>어느 서버로 갈지</td></tr>
+          <tr><td><code>EC2_USER</code></td><td><code>ubuntu</code></td><td>누구로 들어갈지</td></tr>
+        </tbody>
+      </table></div>
+      <pre class="cmd"><span class="c"># push하면 Actions가 서버에서 대신 실행하는 명령</span>
+cd ~/app &amp;&amp; git pull --ff-only
+docker compose -f compose.prod.yaml up -d --build
+manage.py migrate --noinput &amp;&amp; manage.py collectstatic --noinput</pre>
+    </div></li>
+  </ol>
+</section>
+
+<section>
+  <p class="sec-label">막혔던 것</p>
+  <h2>실제로 걸린 문제와 해결</h2>
+  <div class="trouble">
+    <div><p class="sym">워크플로 파일을 push하니 거부됨</p><p>Windows에 저장된 GitHub 로그인 토큰에 <code>workflow</code> 권한이 없었습니다.</p><p class="fix">저장된 로그인을 지우고 다시 로그인해서 해결 (가이드 4단계)</p></div>
+    <div><p class="sym">서버 만들 때 "VPC가 없다"고 나옴</p><p>예전 실습에서 서울 리전 기본 네트워크(VPC)를 지워 둔 상태였습니다.</p><p class="fix">기본 VPC를 새로 만들어서 해결</p></div>
+    <div><p class="sym">Actions가 <code>ssh: unable to authenticate</code>로 실패</p><p>열쇠는 맞았는데 <code>EC2_USER</code> 값 앞에 눈에 안 보이는 탭 문자가 붙어 있었습니다. 서버 기록에 <code>Invalid user \tubuntu</code>가 남아 있어서 찾았습니다.</p><p class="fix">Secret 값을 지우고 <code>ubuntu</code>를 직접 타이핑해서 해결</p></div>
+  </div>
+</section>
+
+<section>
+  <p class="sec-label">요금</p>
+  <h2>누가, 얼마나 내나</h2>
+  <p>이 AWS 계정은 학원이 나눠 준 공용 계정이라 요금은 학원이 냅니다. 1인당 한도는 1만 원이고, 11월 3일 17:30에 계정이 해지됩니다. 요금은 하루쯤 늦게 집계되므로 정확한 금액은 강사님께 확인합니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>켜 둔 것</th><th>시간당 (서울 정가 추정)</th><th>하루 켜 두면</th></tr></thead>
+    <tbody>
+      <tr><td>EC2 t3.small</td><td class="num">약 $0.026</td><td class="num">약 $0.62</td></tr>
+      <tr><td>퍼블릭 IP (탄력적 IP)</td><td class="num">$0.005</td><td class="num">$0.12</td></tr>
+      <tr><td>디스크 EBS 20GB</td><td class="num">—</td><td class="num">약 $0.06</td></tr>
+      <tr><td><b>합계</b></td><td class="num"></td><td class="num"><b>약 $0.80 (약 1,100원)</b></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">다 쓰면 <b>① 인스턴스 종료 → ② 탄력적 IP 릴리스 → ③ 보안그룹·키 페어 삭제</b> 순서로 지웁니다. 인스턴스만 지우면 탄력적 IP가 혼자 남아 계속 요금이 나갑니다.</p>
+</section>
+
+<section>
+  <p class="sec-label">스스로 점검</p>
+  <h2>이해했는지 확인하는 질문</h2>
+  <div>
+    <details><summary>코드는 GitHub에 있는데 <code>.env</code>는 왜 서버에 따로 만들었나?</summary><p>API 키와 DB 비밀번호가 들어 있어서 Public 저장소에 올리면 누구나 볼 수 있기 때문입니다.</p></details>
+    <details><summary>주소로 들어갔는데 400 Bad Request가 난다면?</summary><p><code>.env</code>의 <code>DJANGO_ALLOWED_HOSTS</code>에 그 주소가 없는 것입니다. 추가한 뒤 컨테이너를 다시 만듭니다.</p></details>
+    <details><summary>nginx는 왜 따로 두나? Django만 켜면 안 되나?</summary><p>Django(gunicorn)는 기능 처리에 집중하고, 손님 응대와 그림·CSS 전달은 nginx가 더 빠르고 안전하게 합니다.</p></details>
+    <details><summary>서버를 지운 뒤 push하면 어떻게 되나?</summary><p>Actions가 접속할 서버가 없어 실패합니다. 다시 배포하면 새 IP로 <code>EC2_HOST</code> Secret만 바꾸면 됩니다.</p></details>
+  </div>
+</section>
+
+<footer>원본: AWS 배포 실습가이드 v1(37쪽). 실제 AWS 서울 리전에서 2026-11-02에 직접 배포하고 확인한 결과입니다. 비밀번호·API 키 값은 이 페이지에 넣지 않았습니다.</footer>
+</div>
